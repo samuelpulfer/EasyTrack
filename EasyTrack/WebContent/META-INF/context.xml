@@ -1,0 +1,16 @@
+<Context>
+	  <Resource name="jdbc/MainDB"
+            auth="Container"
+            type="javax.sql.DataSource"
+            driverClassName="org.sqlite.JDBC"
+            url="jdbc:sqlite:C:\ProgramData\Example\DB\Main.db"
+            factory="org.apache.tomcat.dbcp.dbcp.BasicDataSourceFactory">
+      </Resource>
+	  <Resource name="jdbc/MSSQLDB"
+            auth="Container"
+            type="javax.sql.DataSource"
+            driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"
+            url="jdbc:sqlserver://localhost:49894;databaseName=EasyTrack;user=EasyTrackUser;password=123456"
+            factory="org.apache.tomcat.dbcp.dbcp.BasicDataSourceFactory">
+      </Resource>
+</Context>
