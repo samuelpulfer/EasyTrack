@@ -25,6 +25,9 @@
     <link href="static/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom styles for this template -->
     <link href="static/css/starter-template.css" rel="stylesheet">
+    <link href="static/css/order.css" rel="stylesheet">
+    <!-- AutoComplete -->
+    <link href="static/css/autoComplete/auto-complete.css" rel="stylesheet">
     
 	<title>EasyTrack</title>
 </head>
@@ -63,9 +66,121 @@
 
     <main role="main" class="container">
 
-	<div class="starter-template">
-		<h1>Bootstrap starter template</h1>
-		<p class="lead">Use this document as a way to quickly start any new project.<br> All you get is this text and a mostly barebones HTML document.</p>
+		<div id="antrag">
+	<div class="container">
+	
+	
+		<div class="row border border-dark">
+			
+			
+			<table class="table borderless">
+				<tr>
+					<td>
+						<h2>Patient</h2>
+					</td>
+				</tr>
+				<tr>
+					<td class="col-70p">
+						<label for="fallnummer"><b>Fallnummer:</b></label>
+						<input type="text" class="form-control" id="fallnummer">
+					</td>
+				</tr>
+			</table>
+		</div>
+		<br>
+		<div class="row border border-dark">
+			<table class="table borderless">
+				<tr>
+					<td>
+						<h2>Transport</h2>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<label for="von"><b>Von:</b></label>
+						<input type="text" class="form-control" id="von" name="von" placeholder="Station..." autocomplete="off">
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<label for="nach"><b>Nach:</b></label>
+						<input type="text" class="form-control" id="nach" name="nach" placeholder="Station..." autocomplete="off">
+					</td>
+				</tr>
+			</table>
+			<table class="table borderless">
+				<tr>
+					<td><b>Zeitpunkt:</b></td>
+
+					<td>
+						<label class="radio-inline"><input type="radio" name="zeitpunkt" id="radioNow" onclick="zeitpunktChange();" checked>So Schnell wie m&ouml;glich</label>
+					</td>
+
+					
+					<td>
+						<label class="radio-inline"><input type="radio" name="zeitpunkt" onclick="zeitpunktChange();" id="radioStart">Abholzeitpunkt</label>
+					</td>
+					<td>
+						<label class="radio-inline"><input type="radio" name="zeitpunkt" onclick="zeitpunktChange();" id="radioEnd">Ankunftszeitpunkt</label>
+					</td>
+				</tr>
+			</table>
+			<table class="table borderless">
+				<tr>
+					<td>
+						<label for="datum"><b>Datum:</b></label>
+						<input type="date" class="form-control" id="datum" name="datum" autocomplete="off" disabled>
+					</td>
+					<td>
+						<label for="zeit"><b>Zeit:</b></label>
+						<input type="time" class="form-control" id="zeit" name="zeit" autocomplete="off" disabled>
+					</td>
+				</tr>
+			</table>
+			<table class="table borderless">
+				<tr>
+					<td>
+						<b>Transportart: </b>
+					</td>
+					<td>
+						<label class="radio-inline"><input type="radio" name="transportart" id="radioBett" checked>Bett</label>
+					</td>
+					<td>
+						<label class="radio-inline"><input type="radio" name="transportart" id="radioStuhl">Rollstuhl</label>
+					</td>
+					<td>
+						<label class="radio-inline"><input type="radio" name="transportart" id="radioFuss">zu Fuss</label>
+					</td>
+				</tr>
+			</table>
+			<table class="table borderless">
+				<tr>
+					<td>
+						<div class="checkbox">
+							<label><input type="checkbox" id="isolation" value="">Isolation</label>
+						</div>
+					</td>
+					<td>
+						<div class="checkbox">
+							<label><input type="checkbox" id="notfall" value="">Notfall</label>
+						</div>
+					</td>
+				</tr>
+			</table>
+	
+			<table class="table borderless">
+				<tr>
+					<td>
+						<label for="nachricht"><b>Nachricht an Transporteur:</b></label>
+						<textarea class="form-control" id="nachricht" rows="5"></textarea>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	<br>
+	<div id="errordiv"></div>
+	<button type="button" class="btn btn-success" onclick="sendOrder();">Absenden</button>
 	</div>
 
     </main><!-- /.container -->
@@ -80,5 +195,7 @@
     <script src="/static/js/vendor/popper.min.js"></script>
     -->
     <script src="static/js/bootstrap.min.js"></script>
+    <script src="static/js/autoComplete/auto-complete.min.js"></script>
+    <script src="static/js/order.js"></script>
 </body>
 </html>

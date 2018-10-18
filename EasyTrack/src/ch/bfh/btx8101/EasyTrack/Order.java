@@ -1,8 +1,12 @@
 package ch.bfh.btx8101.EasyTrack;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -17,9 +21,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import org.json.JSONObject;
+
 import ch.bfh.btx8101.examples.Authorization;
 import ch.bfh.btx8101.examples.Employee;
 import ch.bfh.btx8101.examples.EnvironmentAuthorization;
+import ch.bfh.btx8101.examples.JSONHelper;
 import ch.bfh.btx8101.examples.LocalEmployee;
 
 /**
@@ -28,7 +35,7 @@ import ch.bfh.btx8101.examples.LocalEmployee;
 @WebServlet("/Order")
 public class Order extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-       
+    private Connection conn;
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -44,22 +51,24 @@ public class Order extends HttpServlet {
 		// Database Connection
 		try {
 			Context ctx = new InitialContext();
-			DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/MSSQLDB");
-			Connection conn = ds.getConnection();
-			System.out.println(conn.isClosed());
-			System.out.println("successfully connected to db");
+			DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/MariaDB");
+			conn = ds.getConnection();
 		} catch (NamingException | SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 	}
 
 	/**
 	 * @see Servlet#destroy()
 	 */
 	public void destroy() {
-		// TODO Auto-generated method stub
+		try {
+			conn.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -68,7 +77,7 @@ public class Order extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		HttpSession session = request.getSession();
 		if(session.isNew()) {
-			session.setMaxInactiveInterval(10);
+			session.setMaxInactiveInterval(300);
 			session.setAttribute("User", new LocalEmployee(request.getRemoteUser()));
 			session.setAttribute("Authenticated", false);
 			session.setAttribute("Authorized", false);
@@ -101,8 +110,124 @@ public class Order extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		doGet(request, response);
+		StringBuilder errormessage = new StringBuilder();
+		int dest_start = 0;
+		int dest_end = 0;
+		Timestamp startzeit = null;
+		Timestamp endzeit = null;
+		
+		HttpSession session = request.getSession();
+		if(session.isNew()) {
+			session.setMaxInactiveInterval(300);
+			session.setAttribute("User", new LocalEmployee(request.getRemoteUser()));
+			session.setAttribute("Authenticated", false);
+			session.setAttribute("Authorized", false);
+			errormessage.append("Ihre Session ist abgelaufen, bitte aktualisieren sie die Seite");
+		}
+		LocalEmployee emp = (LocalEmployee) session.getAttribute("User");
+		JSONHelper jh = new JSONHelper();
+		JSONObject jo = JSONHelper.requestToJSON(request);
+		System.out.println(jo.toString());
+		
+		if(jo.getString("fallnummer").equals(""))
+			errormessage.append("Fallnummer darf nicht leer sein\n");
+		if(jo.getString("von").equals(""))
+			errormessage.append("\"Von\" darf nicht leer sein\n");
+		if(jo.getString("nach").equals(""))
+			errormessage.append("\"Nach\" darf nicht leer sein\n");
+		if(jo.getString("startzeit").equals("") && jo.getString("endzeit").equals(""))
+			errormessage.append("Start- oder Endzeit muss ausgewaehlt werden\n");
+		if(jo.getString("transportart").equals(""))
+			errormessage.append("Transportart darf nicht leer sein\n");
+		if(errormessage.length() > 0) {
+			jh.defaultAnswer(1, errormessage.toString());
+		} else {
+			dest_start = getDestinationId(jo.getString("von"));
+			dest_end = getDestinationId(jo.getString("nach"));
+			if(dest_start == 0)
+				errormessage.append("\"Von\" ist keine gueltige Station\n");
+			if(dest_end == 0)
+				errormessage.append("\"Nach\" ist keine gueltige Station\n");
+			System.out.println(jo.getString("startzeit").length());
+			if(jo.getString("startzeit").length() == 19) {
+				try {
+					startzeit = Timestamp.valueOf(jo.getString("startzeit"));
+				} catch (IllegalArgumentException e) {
+					errormessage.append("Zeitpunkt ist nicht gueltig\n");
+				}
+			} else if(jo.getString("endzeit").length() == 19) {
+				try {
+					endzeit = Timestamp.valueOf(jo.getString("endzeit"));
+				} catch (IllegalArgumentException e) {
+					errormessage.append("Zeitpunkt ist nicht gueltig\n");
+				}
+			} else if(!jo.getString("startzeit").equalsIgnoreCase("asap"))
+				errormessage.append("Zeitpunkt ist nicht gueltig\n");
+			if(errormessage.length() <= 0) {
+				try {
+					Timestamp now = Timestamp.valueOf(java.time.LocalDateTime.now());
+					PreparedStatement prep = conn.prepareStatement("INSERT INTO `order` (fid,destination_start,destination_end,ts_start,ts_end,mode,isolation,emergency,message,creator,created,modified) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
+					prep.setString(1, jo.getString("fallnummer"));
+					prep.setInt(2, dest_start);
+					prep.setInt(3, dest_end);
+					if(startzeit == null && endzeit == null)
+						prep.setTimestamp(4, now);
+					else if (startzeit != null)
+						prep.setTimestamp(4, startzeit);
+					else
+						prep.setNull(4, java.sql.Types.TIMESTAMP);
+					if(endzeit == null)
+						prep.setNull(5, java.sql.Types.TIMESTAMP);
+					else
+						prep.setTimestamp(5, endzeit);
+					prep.setString(6, jo.getString("transportart"));
+					prep.setBoolean(7, jo.getBoolean("isolation"));
+					prep.setBoolean(8, jo.getBoolean("notfall"));
+					if(jo.getString("message").equals(""))
+						prep.setNull(9, java.sql.Types.VARCHAR);
+					else
+						prep.setString(9, jo.getString("message"));
+					prep.setString(10, emp.getUsername());
+					prep.setTimestamp(11, now);
+					prep.setTimestamp(12, now);
+					prep.execute();
+					conn.commit();
+					prep.close();
+					jh.defaultAnswer(new JSONObject());
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					errormessage.append(e.getMessage());
+					jh.defaultAnswer(1, errormessage.toString());
+				}
+			} else {
+				jh.defaultAnswer(1, errormessage.toString());
+			}
+			
+		}
+		System.out.println(jh.toString());
+		response.setContentType("application/json");
+		PrintWriter out = response.getWriter();
+		out.print(jh);
+		out.flush();
+	}
+	
+	private int getDestinationId(String stationname) {
+		int resultId = 0;
+		try {
+			PreparedStatement prep = conn.prepareStatement("SELECT id FROM destinations WHERE deleted IS NULL AND name=?");
+			prep.setString(1, stationname);
+			ResultSet rs = prep.executeQuery();
+			if (rs.next()) {
+				resultId = rs.getInt(1);
+			}
+			rs.close();
+			prep.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return resultId;
 	}
 
 }

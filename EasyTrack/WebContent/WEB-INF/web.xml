@@ -9,16 +9,28 @@
     <welcome-file>default.htm</welcome-file>
     <welcome-file>default.jsp</welcome-file>
   </welcome-file-list>
-<resource-ref>
-    <description>Main Database</description>
-    <res-ref-name>jdbc/MainDB</res-ref-name>
+  <resource-ref>
+    <description>SQLite Database</description>
+    <res-ref-name>jdbc/SQLite</res-ref-name>
     <res-type>javax.sql.DataSource</res-type>
     <res-auth>Container</res-auth>
-</resource-ref>
-<resource-ref>
+  </resource-ref>
+  <resource-ref>
     <description>MS SQL DB</description>
     <res-ref-name>jdbc/MSSQLDB</res-ref-name>
     <res-type>javax.sql.DataSource</res-type>
     <res-auth>Container</res-auth>
-</resource-ref>
+  </resource-ref>
+  <resource-ref>
+    <description>PostgreSQL DB</description>
+    <res-ref-name>jdbc/postgres</res-ref-name>
+    <res-type>javax.sql.DataSource</res-type>
+    <res-auth>Container</res-auth>
+  </resource-ref>
+  <resource-ref>
+    <description>MariaDB</description>
+    <res-ref-name>jdbc/MariaDB</res-ref-name>
+    <res-type>javax.sql.DataSource</res-type>
+    <res-auth>Container</res-auth>
+  </resource-ref>
 </web-app>
