@@ -19,6 +19,36 @@ public class LocalEmployee implements Employee {
 		this.lastname = lastname;
 		this.sex = sex;
 	}
+	
+	public void setEmpNr(String empNr) {
+		this.empNr = empNr;
+	}
+	public void setTitle(String title) {
+		this.title = title;
+	}
+	public void setFirstname(String firstname) {
+		this.firstname = firstname;
+	}
+	public void setLastname(String lastname) {
+		this.lastname = lastname;
+	}
+	public void setSex(String sex) {
+		if(sex != null && sex.equalsIgnoreCase("M"))
+			this.sex = Sex.MALE;
+		else if(sex != null && sex.equalsIgnoreCase("F"))
+			this.sex = Sex.FEMALE;
+		else
+			this.sex = Sex.APACHEHELICOPTER;
+	}
+	public void setSex(Sex sex) {
+		this.sex = sex;
+	}
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
 	@Override
 	public String getEmployeeNumber() {

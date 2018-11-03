@@ -30,6 +30,7 @@ public class KillSession extends HttpServlet {
 		// TODO Auto-generated method stub
 		HttpSession session = request.getSession();
 		session.invalidate();
+		response.setStatus(401);
 		response.getWriter().append("Served at: ").append(request.getContextPath());
 	}
 

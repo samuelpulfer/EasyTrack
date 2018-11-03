@@ -14,6 +14,8 @@ import javax.servlet.http.HttpSession;
 
 import org.json.JSONObject;
 
+import ch.bfh.btx8101.EasyTrack.Auth.AuthHelper;
+
 
 /**
  * Servlet implementation class Login
@@ -21,6 +23,7 @@ import org.json.JSONObject;
 @WebServlet("/Login")
 public class Login extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	private DatabaseAuth dba;
        
     /**
      * @see HttpServlet#HttpServlet()
@@ -34,7 +37,7 @@ public class Login extends HttpServlet {
 	 * @see Servlet#init(ServletConfig)
 	 */
 	public void init(ServletConfig config) throws ServletException {
-		// TODO Auto-generated method stub
+		dba = new DatabaseAuth();
 	}
 
 	/**
@@ -48,12 +51,14 @@ public class Login extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		HttpSession session = request.getSession();
-		if(session.isNew()) {
-			session.setMaxInactiveInterval(300);
-			session.setAttribute("User", new LocalEmployee(request.getRemoteUser()));
+		HttpSession session = AuthHelper.checkSession(request);
+		//Logout
+		String logout = request.getParameter("logout");
+		if(logout != null && logout.equals("true")) {
 			session.setAttribute("Authenticated", false);
 			session.setAttribute("Authorized", false);
+			session.setAttribute("User", dba.getEmployee("guest"));
+			response.setStatus(401);
 		}
 		
 		RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/Login.jsp");
@@ -70,13 +75,10 @@ public class Login extends HttpServlet {
 		String username = jo.getString("username");
 		String passwd = jo.getString("password");
 		
-		System.out.println(username);
-		System.out.println(passwd);
-		
 		if(username == null || passwd == null)
 			jh.defaultAnswer(1, "Something went wrong");
 		else {
-			Authentication auth = new InternalAuth();
+			Authentication auth = dba;
 			Employee emp = auth.authenticate(username, passwd);
 			if(emp == null)
 				jh.defaultAnswer(1, "Wrong username or password");

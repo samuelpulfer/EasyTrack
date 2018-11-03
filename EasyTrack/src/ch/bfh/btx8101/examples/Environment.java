@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import ch.bfh.btx8101.EasyTrack.Auth.AuthHelper;
+
 /**
  * Servlet implementation class Environment
  */
@@ -29,31 +31,15 @@ public class Environment extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		HttpSession session = request.getSession();
-		if(session.isNew()) {
-			session.setMaxInactiveInterval(60);
-			session.setAttribute("User", new LocalEmployee(request.getRemoteUser()));
-			if(request.getRemoteUser() == null)
-				session.setAttribute("Authenticated", false);
-			else
-				session.setAttribute("Authenticated", true);
-			session.setAttribute("Authorized", false);
-		}
+		HttpSession session = AuthHelper.checkSession(request);
 		
-		
-		// Logout
-		String logout = request.getParameter("logout");
-		if(logout != null && logout.equals("true")) {
-			session.setAttribute("Authenticated", false);
-			session.setAttribute("User", new LocalEmployee(null));
-		}
 		RequestDispatcher rd;
 		if((Boolean) session.getAttribute("Authenticated") == false)
 			rd = request.getRequestDispatcher("/WEB-INF/Login.jsp");
 		else {
 			// Authorization
-			Authorization authorization = new EnvironmentAuthorization();
-			if(authorization.authorize((Employee) session.getAttribute("User"))) {
+			Authorization authorization = new DatabaseAuth();
+			if(authorization.authorize((Employee) session.getAttribute("User"), "administrator")) {
 				session.removeAttribute("customLoginMessage");
 				rd = request.getRequestDispatcher("/WEB-INF/Environment.jsp");
 			} else {

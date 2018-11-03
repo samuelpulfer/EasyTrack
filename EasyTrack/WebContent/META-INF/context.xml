@@ -35,4 +35,16 @@
 		maxIdle="30"
 		maxWait="10000">
 	</Resource>
+	
+
+		
+	<Realm className="org.apache.catalina.realm.DataSourceRealm" 
+		dataSourceName="jdbc/MariaDB" 
+		userTable="users" 
+		userNameCol="username" 
+		userCredCol="password" 
+		userRoleTable="roles" 
+		roleNameCol="role"
+		digest="MD5"
+		localDataSource="true"/>
 </Context>

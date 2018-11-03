@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import ch.bfh.btx8101.EasyTrack.Auth.AuthHelper;
+
 /**
  * Servlet implementation class Example
  */
@@ -44,18 +46,10 @@ public class Example extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		HttpSession session = request.getSession();
-		if(session.isNew()) {
-			session.setMaxInactiveInterval(10);
-			session.setAttribute("User", new LocalEmployee(request.getRemoteUser()));
-			session.setAttribute("Authenticated", false);
-			session.setAttribute("Authorized", false);
-		}
-		//Logout
+		HttpSession session = AuthHelper.checkSession(request);
 		
 		Employee emp = (Employee) session.getAttribute("User");
-		if(emp.getUsername() == null) {
+		if(emp != null && emp.getUsername() == null) {
 			// Loginscreen
 		}
 

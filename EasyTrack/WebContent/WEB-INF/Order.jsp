@@ -59,7 +59,7 @@
           </li>
         </ul>
         <form class="form-inline my-2 my-lg-0">
-          <button class="btn btn-outline-success my-2 my-sm-0" type="button" onClick="location.href = '?logout=true';"><%= user %> abmelden</button>
+          <button class="btn btn-outline-success my-2 my-sm-0" type="button" onClick="location.href = 'Login?logout=true';"><%= user %> abmelden</button>
         </form>
       </div>
     </nav>
