@@ -17,7 +17,7 @@ public class AuthHelper {
 	
 	public static HttpSession checkSession(HttpServletRequest request) {
 		HttpSession session = request.getSession();
-		if (session.isNew()) {
+		if (session.isNew() || session.getAttribute("User") == null) {
 			DatabaseAuth dba = new DatabaseAuth();
 			String remoteUser = request.getRemoteUser();
 			Employee emp = null;
