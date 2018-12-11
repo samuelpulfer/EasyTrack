@@ -15,6 +15,7 @@ function setup() {
     history = new History(AMOUNF_HISTORY);
     index = 0;
     createCanvas(1152, 648); // dimensionen vom bild angeben
+    //canvas.parent('sketch-holder');
     frameRate(5); // 5: 5fps, 1: 1fps
   }
   

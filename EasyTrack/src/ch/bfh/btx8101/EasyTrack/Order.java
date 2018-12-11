@@ -23,7 +23,9 @@ import javax.sql.DataSource;
 
 import org.json.JSONObject;
 
+import ch.bfh.btx8101.EasyTrack.Auth.AuthHelper;
 import ch.bfh.btx8101.examples.Authorization;
+import ch.bfh.btx8101.examples.DatabaseAuth;
 import ch.bfh.btx8101.examples.Employee;
 import ch.bfh.btx8101.examples.EnvironmentAuthorization;
 import ch.bfh.btx8101.examples.JSONHelper;
@@ -93,8 +95,8 @@ public class Order extends HttpServlet {
 					rd = request.getRequestDispatcher("/WEB-INF/Login.jsp");
 				else {
 					// Authorization
-					Authorization authorization = new EnvironmentAuthorization();
-					if(authorization.authorize((Employee) session.getAttribute("User"))) {
+					Authorization authorization = new DatabaseAuth();
+					if(authorization.authorize((Employee) session.getAttribute("User"), "carrier")) {
 						session.removeAttribute("customLoginMessage");
 						rd = request.getRequestDispatcher("/WEB-INF/Order.jsp");
 					} else {
@@ -116,14 +118,15 @@ public class Order extends HttpServlet {
 		Timestamp startzeit = null;
 		Timestamp endzeit = null;
 		
-		HttpSession session = request.getSession();
-		if(session.isNew()) {
-			session.setMaxInactiveInterval(300);
-			session.setAttribute("User", new LocalEmployee(request.getRemoteUser()));
-			session.setAttribute("Authenticated", false);
-			session.setAttribute("Authorized", false);
-			errormessage.append("Ihre Session ist abgelaufen, bitte aktualisieren sie die Seite");
-		}
+		HttpSession session = AuthHelper.checkSession(request);
+		//HttpSession session = request.getSession();
+		//if(session.isNew()) {
+		//	session.setMaxInactiveInterval(300);
+		//	session.setAttribute("User", new LocalEmployee(request.getRemoteUser()));
+		//	session.setAttribute("Authenticated", false);
+		//	session.setAttribute("Authorized", false);
+		//	errormessage.append("Ihre Session ist abgelaufen, bitte aktualisieren sie die Seite");
+		//}
 		LocalEmployee emp = (LocalEmployee) session.getAttribute("User");
 		JSONHelper jh = new JSONHelper();
 		JSONObject jo = JSONHelper.requestToJSON(request);
@@ -165,19 +168,22 @@ public class Order extends HttpServlet {
 				errormessage.append("Zeitpunkt ist nicht gueltig\n");
 			if(errormessage.length() <= 0) {
 				try {
+					System.out.println("will now insert the order to db");
 					Timestamp now = Timestamp.valueOf(java.time.LocalDateTime.now());
-					PreparedStatement prep = conn.prepareStatement("INSERT INTO `order` (fid,destination_start,destination_end,ts_start,ts_end,mode,isolation,emergency,message,creator,created,modified) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
+					PreparedStatement prep = conn.prepareStatement("INSERT INTO `order` (fid,destination_start,destination_end,ts_start,ts_end,mode,isolation,emergency,message,creator,created,modified,state,carrier) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 					prep.setString(1, jo.getString("fallnummer"));
 					prep.setInt(2, dest_start);
 					prep.setInt(3, dest_end);
-					if(startzeit == null && endzeit == null)
+					if(startzeit == null && endzeit == null) {
 						prep.setTimestamp(4, now);
-					else if (startzeit != null)
+						prep.setTimestamp(5, now);
+					} else if (startzeit != null) {
 						prep.setTimestamp(4, startzeit);
-					else
+						prep.setTimestamp(5, startzeit);
+					} else
 						prep.setNull(4, java.sql.Types.TIMESTAMP);
 					if(endzeit == null)
-						prep.setNull(5, java.sql.Types.TIMESTAMP);
+						prep.setTimestamp(5, now);
 					else
 						prep.setTimestamp(5, endzeit);
 					prep.setString(6, jo.getString("transportart"));
@@ -190,6 +196,11 @@ public class Order extends HttpServlet {
 					prep.setString(10, emp.getUsername());
 					prep.setTimestamp(11, now);
 					prep.setTimestamp(12, now);
+					prep.setInt(13, 0);
+					if(emp.getUsername().equals("admin"))
+						prep.setString(14, "carrier05");
+					else
+						prep.setString(14, emp.getUsername());
 					prep.execute();
 					conn.commit();
 					prep.close();

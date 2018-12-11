@@ -47,12 +47,23 @@
       <web-resource-name>Carrier</web-resource-name>
       <url-pattern>/Carrier</url-pattern>
       <http-method>POST</http-method>
+      <http-method>GET</http-method>
     </web-resource-collection>
     <auth-constraint>
       <role-name>carrier</role-name>
     </auth-constraint>
   </security-constraint>
-  
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Tasks</web-resource-name>
+      <url-pattern>/Tasks</url-pattern>
+      <http-method>POST</http-method>
+      <http-method>GET</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>carrier</role-name>
+    </auth-constraint>
+  </security-constraint>
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>Location</web-resource-name>
@@ -63,7 +74,6 @@
       <role-name>carrier</role-name>
     </auth-constraint>
   </security-constraint>
-  
   <security-role>
     <role-name>administrator</role-name>
   </security-role>

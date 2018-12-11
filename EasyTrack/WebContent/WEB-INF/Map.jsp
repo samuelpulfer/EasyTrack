@@ -17,7 +17,7 @@
 <head>
 	<meta charset="ISO-8859-1">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="EasyTrack">
+    <meta name="description" content="Map">
     <meta name="author" content="samuelpulfer@gmail.com">
     <link rel="icon" href="static/img/underconstruction.ico">
     
@@ -26,11 +26,11 @@
     <!-- Custom styles for this template -->
     <link href="static/css/starter-template.css" rel="stylesheet">
     
-	<title>EasyTrack</title>
+	<title>EasyTrack Map</title>
 </head>
 <body>
     <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-      <a class="navbar-brand" href="#">EasyTrack</a>
+      <a class="navbar-brand" href="#">EasyTrack Map</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -58,9 +58,8 @@
 
     <main role="main" class="container">
 
-	<div class="starter-template">
-		<h1>EasyTrack</h1>
-		<p class="lead">A simple mockup ;).</p>
+	<div class="align-items-center" id="sketch-holder">
+		
 	</div>
 
     </main><!-- /.container -->
@@ -75,5 +74,9 @@
     <script src="/static/js/vendor/popper.min.js"></script>
     -->
     <script src="static/js/bootstrap.min.js"></script>
+    <script src="static/js/map/p5.min.js"></script>
+    <script src="static/js/map/Coord.js"></script>
+    <script src="static/js/map/History.js"></script>
+    <script src="static/js/map/sketch.js"></script>
 </body>
 </html>
